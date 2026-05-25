@@ -1,0 +1,65 @@
+# Daily Email Summary AI Agent
+
+An AI-powered automation workflow that collects emails, processes content intelligently, generates concise summaries, and delivers them directly to Telegram.
+
+## Overview
+
+This workflow automatically:
+
+1. Runs on a scheduled trigger
+2. Retrieves incoming Gmail messages
+3. Processes email data using custom code
+4. Uses AI to analyze and summarize content
+5. Sends clean summaries directly to Telegram
+
+## Workflow Architecture
+
+Schedule Trigger
+↓
+Gmail Message Retrieval
+↓
+Data Processing Layer
+↓
+AI Agent Analysis
+↓
+Telegram Notification
+
+## Features
+
+- Automated scheduled execution
+- Gmail integration
+- AI-generated summaries
+- Smart content filtering
+- Telegram delivery
+- Scalable workflow structure
+- Reduced email overload
+
+## Technologies Used
+
+- Gmail API
+- AI Agent
+- Groq Chat Model
+- Telegram Bot API
+- Automation Workflow Engine
+
+## Use Cases
+
+- Daily inbox summaries
+- Business email monitoring
+- Important message tracking
+- Productivity automation
+- Personal assistant workflows
+
+## Future Improvements
+
+- Priority classification
+- Multi-language summaries
+- Sentiment analysis
+- Smart categorization
+- Memory-based context handling
+
+## Author
+
+Saizul Amin  
+Founder & Digital Systems Strategist  
+Web Developer | SEO Specialist | Automation Builder
