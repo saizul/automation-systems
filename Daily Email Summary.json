@@ -1,0 +1,191 @@
+{
+  "name": "Daily Email Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "948d049c-f13d-4eeb-9b22-18eb08b5a7ec",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 20,
+        "filters": {
+          "q": "is:unread newer_than:1d"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "1f012ef8-bd25-4c2d-b649-38f05bd2cbd6",
+      "name": "Get many messages",
+      "webhookId": "b764a9cd-a5f4-44b6-a9af-ed2ee1741eeb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LoyszXiyeX4EW2YX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=নিচে আজকের unread email গুলোর তথ্য আছে। তোমার কাজ:\n\n১. প্রতিটা email-কে priority দাও:\n   🔴 জরুরি (urgent: meeting, deadline, payment, OTP)\n   🟡 গুরুত্বপূর্ণ (important: work, response needed)\n   🟢 সাধারণ (newsletter, promotional, social)\n\n২. শুধু 🔴 এবং 🟡 email গুলোর সংক্ষিপ্ত summary দাও বাংলায়।\n\n৩. কোন email গুলোতে আজকেই reply দিতে হবে সেটা mention করো।\n\n৪. ৩ লাইনের overview দিয়ে শুরু করো।\n\nEmail list:\n{{ $json.emailList }}\n\nমোট email সংখ্যা: {{ $json.emailCount }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "e7c9a328-0cf6-4191-a887-620f9a5f706b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        544,
+        208
+      ],
+      "id": "f29e3a4f-7f96-47b3-8709-39b237608c0a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "w2n5y2mh2QIIydrO",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1366233331",
+        "text": "=🌅 শুভ সকাল! আজকের Email Summary:\n\n📊 মোট নতুন Email: {{ $('Code').item.json.emailCount }}\n\n{{ $json.output }}\n\n━━━━━━━━━━━━━━━━━━━\n☕ Have a productive day!",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "37a0e57f-91fa-49a8-b4db-c8fd94190054",
+      "name": "Send a text message",
+      "webhookId": "29f1275f-ff71-4370-a270-6784af4963e7",
+      "credentials": {
+        "telegramApi": {
+          "id": "NqY9Xqy4WbOQkv8L",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gmail থেকে আসা email গুলোকে clean format-এ আনি\nconst emails = $input.all();\n\nif (emails.length === 0) {\n  return [{\n    json: {\n      emailCount: 0,\n      emailList: \"কোনো নতুন email নেই।\",\n      hasEmails: false\n    }\n  }];\n}\n\nlet emailList = \"\";\nlet counter = 1;\n\nfor (const email of emails) {\n  const data = email.json;\n  \n  // Sender extract\n  const from = data.From || data.from || \"Unknown\";\n  const subject = data.Subject || data.subject || \"(no subject)\";\n  const snippet = data.snippet || \"\";\n  \n  // Date format\n  const dateStr = data.Date || data.date || data.internalDate || \"\";\n  \n  emailList += `${counter}. From: ${from}\\n`;\n  emailList += `   Subject: ${subject}\\n`;\n  emailList += `   Preview: ${snippet.substring(0, 200)}...\\n\\n`;\n  \n  counter++;\n}\n\nreturn [{\n  json: {\n    emailCount: emails.length,\n    emailList: emailList,\n    hasEmails: true,\n    currentDate: new Date().toLocaleDateString('bn-BD')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "febfacb7-48b2-4740-91db-225dfd53b593",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d143b89e-c16c-4cbf-a4aa-3d1752ecfbe0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37356d8d71dd6fd9e03fb49707985f0f269a06e97f20b01eeb40bceb1b8642c6"
+  },
+  "id": "8hMSM4ZPVlKIrRmJ",
+  "tags": []
+}
