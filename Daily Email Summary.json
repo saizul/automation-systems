@@ -81,7 +81,7 @@
     },
     {
       "parameters": {
-        "chatId": "1366233331",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
         "text": "=🌅 শুভ সকাল! আজকের Email Summary:\n\n📊 মোট নতুন Email: {{ $('Code').item.json.emailCount }}\n\n{{ $json.output }}\n\n━━━━━━━━━━━━━━━━━━━\n☕ Have a productive day!",
         "additionalFields": {
           "appendAttribution": false,
